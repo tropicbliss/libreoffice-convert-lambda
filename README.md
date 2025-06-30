@@ -10,7 +10,9 @@ Fonts have not been included in the repo for licensing reasons.
 
 ## Credits
 
-- [SST](https://sst.dev/)
+- [@rayli09](https://github.com/rayli09) for the suggestion to use
+  [this Pulumi example](https://github.com/pulumi/examples/blob/master/aws-ts-lambda-thumbnailer/index.ts)
+  as a starting point.
 - [libreoffice-lambda-base-image](https://github.com/shelfio/libreoffice-lambda-base-image)
   and [@jonathankeebler](https://github.com/jonathankeebler) for the
   [pull request updating LibreOffice](https://github.com/shelfio/libreoffice-lambda-base-image/pull/44).
