@@ -10,6 +10,7 @@ Fonts have not been included in the repo for licensing reasons.
 
 ## Credits
 
-[libreoffice-lambda-base-image](https://github.com/shelfio/libreoffice-lambda-base-image)
-and [@jonathankeebler](https://github.com/jonathankeebler) for the
-[pull request updating LibreOffice](https://github.com/shelfio/libreoffice-lambda-base-image/pull/44).
+- [SST](https://sst.dev/)
+- [libreoffice-lambda-base-image](https://github.com/shelfio/libreoffice-lambda-base-image)
+  and [@jonathankeebler](https://github.com/jonathankeebler) for the
+  [pull request updating LibreOffice](https://github.com/shelfio/libreoffice-lambda-base-image/pull/44).
