@@ -9,14 +9,14 @@ ENV PATH=/var/lang/bin:/usr/local/bin:/usr/bin/:/bin:/opt/bin
 # Configure linker to correctly point to libraries
 ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib64"
 
-RUN dnf install -y libSM.x86_64 libXinerama-devel tar gzip nss-tools cups-libs libxslt fontconfig which && dnf clean all
+RUN dnf install -y libSM.x86_64 libXinerama-devel tar gzip nss-tools cups-libs libxslt fontconfig binutils which && dnf clean all
 RUN cp /lib64/libssl.so.3 /lib64/libssl3.so
 
 RUN mkdir ~/libre && cd ~/libre && curl -s -L ${DOWNLOAD_URL} | tar xvz
 
 RUN cd ~/libre/LibreOffice*/RPMS/ && rpm -Uvh *.rpm && rm -fr ~/libre && cd /opt/${LIBREOFFICE_PATH}/ && strip ./**/* || true
 ENV HOME=/tmp
-RUN dnf remove tar gzip -y
+RUN dnf remove tar binutils -y
 
 # Trigger dummy run to generate bootstrap files to improve cold start performance
 RUN touch /tmp/test.txt \
