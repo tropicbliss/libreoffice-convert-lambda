@@ -16,8 +16,6 @@ import { env } from "process";
 import { inspect, promisify } from "util";
 import { exec } from "child_process";
 
-const LIBREOFFICE_PATH = "libreoffice24.8";
-
 const execAsync = promisify(exec);
 
 const app = new Hono();
@@ -29,9 +27,17 @@ app.get("/", (c) => {
 const s3 = new S3Client();
 
 const bucketName = env.bucketName;
-
 if (bucketName === undefined) {
-  throw new Error("Define `bucketName` in environment variables.");
+  throw new Error(
+    "Define `bucketName` in `sst.config.ts` as an environment variable.",
+  );
+}
+
+const libreofficePath = env.LIBREOFFICE_PATH;
+if (libreofficePath === undefined) {
+  throw new Error(
+    "Define `LIBREOFFICE_PATH` in `Dockerfile` as an environment variable.",
+  );
 }
 
 app.post(
@@ -84,7 +90,7 @@ app.post(
       await writeFile("/tmp/document.xlsx", buffer);
       console.log("Processing...");
       await execAsync(
-        `${LIBREOFFICE_PATH} --headless --convert-to pdf --outdir /tmp /tmp/document.xlsx`,
+        `${libreofficePath} --headless --convert-to pdf --outdir /tmp /tmp/document.xlsx`,
       );
       console.log("Processed!");
       const path = "/tmp/document.pdf";
