@@ -7,3 +7,9 @@ server and the converted PDF files are in turn uploaded to S3. The lambda
 returns a pre-signed URL to the object valid for 6 hours.
 
 Fonts have not been included in the repo for licensing reasons.
+
+## Credits
+
+[libreoffice-lambda-base-image](https://github.com/shelfio/libreoffice-lambda-base-image)
+and [@jonathankeebler](https://github.com/jonathankeebler) for the
+[pull request updating LibreOffice](https://github.com/shelfio/libreoffice-lambda-base-image/pull/44).
