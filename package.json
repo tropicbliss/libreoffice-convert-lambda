@@ -1,5 +1,5 @@
 {
-  "name": "file-download-test",
+  "name": "libreoffice-convert-lambda",
   "type": "module",
   "scripts": {
     "build": "tsc",
