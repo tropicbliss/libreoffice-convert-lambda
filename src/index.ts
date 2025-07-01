@@ -20,7 +20,7 @@ import Excel from "exceljs";
 import path from "path";
 
 const URL_EXPIRY_PERIOD_SECS = 6 * 60 * 60;
-const MAX_UPLOAD_FILE_SIZE_BYTES = 545 * 1000;
+const MAX_UPLOAD_FILE_SIZE_BYTES = 850 * 1000;
 
 const execAsync = promisify(exec);
 
