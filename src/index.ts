@@ -17,6 +17,7 @@ import { inspect, promisify } from "util";
 import { exec } from "child_process";
 import { pipeline } from "stream/promises";
 import Excel from "exceljs";
+import path from "path";
 
 const execAsync = promisify(exec);
 
@@ -87,21 +88,23 @@ app.post(
           data: url,
         }));
       }
+      const TEMP_DIRECTORY = "/tmp";
+      const STARTING_FILE_PATH = path.join(TEMP_DIRECTORY, "document.xlsx");
+      const ENDING_FILE_PATH = path.join(TEMP_DIRECTORY, "document.pdf");
       const stream = file.stream();
-      const destination = createWriteStream("/tmp/document.xlsx");
+      const destination = createWriteStream(STARTING_FILE_PATH);
       await pipeline(stream, destination);
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      await writeFile("/tmp/document.xlsx", buffer);
+      await writeFile(STARTING_FILE_PATH, buffer);
       console.log("Processing...");
-      await scaleExcelFile("/tmp/document.xlsx");
+      await scaleExcelFile(STARTING_FILE_PATH);
       await execAsync(
-        `${libreofficePath} --headless --convert-to pdf --outdir /tmp /tmp/document.xlsx`,
+        `${libreofficePath} --headless --convert-to pdf --outdir ${TEMP_DIRECTORY} ${STARTING_FILE_PATH}`,
       );
       console.log("Processed!");
-      const path = "/tmp/document.pdf";
-      const stats = await stat(path);
-      const converted = createReadStream(path);
+      const stats = await stat(ENDING_FILE_PATH);
+      const converted = createReadStream(ENDING_FILE_PATH);
       const uploadCommand = new PutObjectCommand({
         Bucket: bucketName,
         Key: checksum,
