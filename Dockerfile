@@ -16,6 +16,7 @@ RUN mkdir ~/libre && cd ~/libre && curl -s -L ${DOWNLOAD_URL} | tar xvz
 
 RUN cd ~/libre/LibreOffice*/RPMS/ && rpm -Uvh *.rpm && rm -fr ~/libre && cd /opt/${LIBREOFFICE_PATH}/ && strip ./**/* || true
 ENV HOME=/tmp
+RUN cd /usr/bin/${LIBREOFFICE_PATH} && strip ./**/* || true
 RUN dnf remove tar binutils -y
 
 # Trigger dummy run to generate bootstrap files to improve cold start performance
