@@ -19,6 +19,9 @@ import { pipeline } from "stream/promises";
 import Excel from "exceljs";
 import path from "path";
 
+const URL_EXPIRY_PERIOD_SECS = 6 * 60 * 60;
+const MAX_UPLOAD_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+
 const execAsync = promisify(exec);
 
 const app = new Hono();
@@ -46,11 +49,13 @@ if (libreofficePath === undefined) {
 app.post(
   "/",
   bodyLimit({
-    maxSize: 100 * 1024 * 1024,
+    maxSize: MAX_UPLOAD_FILE_SIZE_BYTES,
     onError: (c) => {
       return c.html(mainPage({
         type: "error",
-        data: "File size exceeds 100MB limit.",
+        data: `File size exceeds ${
+          MAX_UPLOAD_FILE_SIZE_BYTES / 1024 / 1024
+        }MB limit.`,
       }));
     },
   }),
@@ -81,7 +86,7 @@ app.post(
       const fileExist = await doesFileExist(s3, checksum);
       if (fileExist) {
         const url = await getSignedUrl(s3, command, {
-          expiresIn: 6 * 60 * 60,
+          expiresIn: URL_EXPIRY_PERIOD_SECS,
         });
         return c.html(mainPage({
           type: "url",
@@ -114,7 +119,7 @@ app.post(
       });
       await s3.send(uploadCommand);
       const url = await getSignedUrl(s3, command, {
-        expiresIn: 6 * 60 * 60,
+        expiresIn: URL_EXPIRY_PERIOD_SECS,
       });
       return c.html(mainPage({
         type: "url",
