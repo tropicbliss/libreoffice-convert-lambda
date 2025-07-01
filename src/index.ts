@@ -8,13 +8,14 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { stat, writeFile } from "fs/promises";
-import { createReadStream } from "fs";
+import { createReadStream, createWriteStream } from "fs";
 import { handle } from "hono/aws-lambda";
 import { createHash } from "crypto";
 import { File } from "buffer";
 import { env } from "process";
 import { inspect, promisify } from "util";
 import { exec } from "child_process";
+import { pipeline } from "stream/promises";
 
 const execAsync = promisify(exec);
 
@@ -85,6 +86,9 @@ app.post(
           data: url,
         }));
       }
+      const stream = file.stream();
+      const destination = createWriteStream("/tmp/document.xlsx");
+      await pipeline(stream, destination);
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       await writeFile("/tmp/document.xlsx", buffer);
