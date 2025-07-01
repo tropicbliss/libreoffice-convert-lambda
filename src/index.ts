@@ -16,6 +16,7 @@ import { env } from "process";
 import { inspect, promisify } from "util";
 import { exec } from "child_process";
 import { pipeline } from "stream/promises";
+import Excel from "exceljs";
 
 const execAsync = promisify(exec);
 
@@ -93,6 +94,7 @@ app.post(
       const buffer = Buffer.from(arrayBuffer);
       await writeFile("/tmp/document.xlsx", buffer);
       console.log("Processing...");
+      await scaleExcelFile("/tmp/document.xlsx");
       await execAsync(
         `${libreofficePath} --headless --convert-to pdf --outdir /tmp /tmp/document.xlsx`,
       );
@@ -183,6 +185,16 @@ async function doesFileExist(
     }
     throw e;
   }
+}
+
+async function scaleExcelFile(path: string) {
+  const workbook = new Excel.Workbook();
+  await workbook.xlsx.read(createReadStream(path));
+  workbook.eachSheet((worksheet, _id) => {
+    worksheet.pageSetup.fitToPage = true;
+    worksheet.pageSetup.fitToHeight = 0;
+  });
+  await workbook.xlsx.write(createWriteStream(path));
 }
 
 async function calculateChecksum(file: File) {
