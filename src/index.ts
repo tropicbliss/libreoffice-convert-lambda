@@ -20,7 +20,7 @@ import Excel from "exceljs";
 import path from "path";
 
 const URL_EXPIRY_PERIOD_SECS = 6 * 60 * 60;
-const MAX_UPLOAD_FILE_SIZE_BYTES = 850 * 1000;
+const MAX_UPLOAD_FILE_SIZE_BYTES = 18 * 1000 * 1000;
 
 const execAsync = promisify(exec);
 
@@ -53,7 +53,9 @@ app.post(
     onError: (c) => {
       return c.html(mainPage({
         type: "error",
-        data: `File size exceeds ${MAX_UPLOAD_FILE_SIZE_BYTES / 1000}KB limit.`,
+        data: `File size exceeds ${
+          MAX_UPLOAD_FILE_SIZE_BYTES / 1000 / 1000
+        }MB limit.`,
       }));
     },
   }),
