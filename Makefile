@@ -26,7 +26,7 @@ help: ## Show this help message
 validate: ## Validate CloudFormation template
 	@echo "$(GREEN)Validating CloudFormation template...$(NC)"
 	aws cloudformation validate-template \
-		--template-body file://../cloudformation.yaml \
+		--template-body file://cloudformation.yaml \
 		--region $(REGION)
 	@echo "$(GREEN)✓ Template validation successful$(NC)"
 
@@ -51,7 +51,7 @@ deploy: validate ## Build and deploy the Lambda function
 	
 	@echo "$(YELLOW)Deploying CloudFormation stack...$(NC)"
 	aws cloudformation deploy \
-		--template-file ../cloudformation.yaml \
+		--template-file cloudformation.yaml \
 		--stack-name $(NAME) \
 		--parameter-overrides Stage=development ImageUri=$(IMAGE_URI) \
 		--capabilities CAPABILITY_NAMED_IAM \
