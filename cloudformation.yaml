@@ -82,9 +82,3 @@ Outputs:
     Value: !GetAtt FunctionUrl.FunctionUrl
     Export:
       Name: !Sub "${AWS::StackName}-FunctionUrl"
-
-  FunctionArn:
-    Description: Lambda Function ARN
-    Value: !GetAtt ConverterFunction.Arn
-    Export:
-      Name: !Sub "${AWS::StackName}-FunctionArn"
