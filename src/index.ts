@@ -34,12 +34,13 @@ app.post(
   bodyLimit({
     maxSize: MAX_UPLOAD_FILE_SIZE_BYTES,
     onError: (c) => {
-      return c.html(mainPage({
-        type: "error",
-        data: `File size exceeds ${
-          MAX_UPLOAD_FILE_SIZE_BYTES / 1000 / 1000
-        }MB limit.`,
-      }));
+      return c.html(
+        mainPage(
+          `File size exceeds ${
+            MAX_UPLOAD_FILE_SIZE_BYTES / 1000 / 1000
+          }MB limit.`,
+        ),
+      );
     },
   }),
   async (c) => {
@@ -47,19 +48,13 @@ app.post(
       const body = await c.req.parseBody();
       const file = body["uploaded_file"];
       if (!file || !(file instanceof File)) {
-        return c.html(mainPage({
-          type: "error",
-          data: "No file was uploaded or file is invalid.",
-        }));
+        return c.html(mainPage("No file was uploaded or file is invalid."));
       }
       const isExcel = file.name.toLowerCase().endsWith(".xlsx") &&
         file.type ===
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
       if (!isExcel) {
-        return c.html(mainPage({
-          type: "error",
-          data: "Invalid file format.",
-        }));
+        return c.html(mainPage("Invalid file format."));
       }
       const TEMP_DIRECTORY = "/tmp";
       const STARTING_FILE_PATH = path.join(TEMP_DIRECTORY, "document.xlsx");
@@ -79,10 +74,7 @@ app.post(
       return returnData(c, ENDING_FILE_PATH, file.name);
     } catch (error) {
       console.error("Upload error:", inspect(error));
-      return c.html(mainPage({
-        type: "error",
-        data: "Failed to upload file.",
-      }));
+      return c.html(mainPage("Failed to upload file."));
     }
   },
 );
@@ -106,7 +98,7 @@ async function returnData(
   });
 }
 
-function mainPage(content?: { type: "error" | "url"; data: string }) {
+function mainPage(error?: string) {
   let html = `
   <!DOCTYPE html>
     <html lang="en">
@@ -126,16 +118,8 @@ function mainPage(content?: { type: "error" | "url"; data: string }) {
           <button type="submit">Upload File</button>
         </form>
   `;
-  if (content !== undefined) {
-    html += "<strong>";
-    switch (content.type) {
-      case "error":
-        html += `Error: ${content.data}`;
-        break;
-      case "url":
-        html += `<a href="${content.data}" target="_blank">Converted file</a>`;
-    }
-    html += "</strong>";
+  if (error !== undefined) {
+    html += `<strong>Error: ${error}</strong>`;
   }
   html += `
         </body>
