@@ -13,7 +13,7 @@ IMAGE_URI="$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$NAME@$DIGEST"
 aws cloudformation deploy \
   --template-file ../cloudformation.yaml \
   --stack-name $NAME \
-  --parameter-overrides Stage=development ImageUri=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$REGION.amazonaws.com/$NAME:latest ImageUri=$IMAGE_URI \
+  --parameter-overrides Stage=development ImageUri=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$NAME:latest ImageUri=$IMAGE_URI \
   --capabilities CAPABILITY_NAMED_IAM \
   --region $REGION
 aws cloudformation describe-stacks --stack-name $NAME --query 'Stacks[0].Outputs' --region $REGION
