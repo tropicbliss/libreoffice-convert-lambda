@@ -7,6 +7,9 @@ Parameters:
     Default: development
     AllowedValues: [development, staging, production]
     Description: Deployment stage
+  ImageUri:
+    Type: String
+    Description: ECR image URI
 
 Conditions:
   IsProduction: !Equals [!Ref Stage, production]
@@ -16,7 +19,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName}-converter-role"
+      RoleName: !Sub "${AWS::StackName}-role"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -38,10 +41,10 @@ Resources:
   ConverterFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${AWS::StackName}-converter"
+      FunctionName: !Ref AWS::StackName
       PackageType: Image
       Code:
-        ImageUri: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/libreoffice-convert-lambda:latest"
+        ImageUri: !Ref ImageUri
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 45
       MemorySize: 3008
