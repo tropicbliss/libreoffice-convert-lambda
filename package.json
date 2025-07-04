@@ -6,14 +6,12 @@
     "shell": "sst shell --stage production tsx"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.839.0",
-    "@aws-sdk/s3-request-presigner": "^3.839.0",
     "exceljs": "^4.4.0",
     "hono": "^4.8.3"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.150",
-    "@types/node": "^24.0.7",
+    "@types/node": "^24.0.10",
     "sst": "^3",
     "tsx": "^4.20.3",
     "typescript": "^5"

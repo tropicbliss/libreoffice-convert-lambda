@@ -11,6 +11,7 @@ import { pipeline } from "stream/promises";
 import Excel from "exceljs";
 import path from "path";
 import { stream } from "hono/streaming";
+import { html } from "hono/html";
 
 const MAX_UPLOAD_FILE_SIZE_BYTES = 18 * 1000 * 1000;
 
@@ -57,8 +58,8 @@ app.post(
         return c.html(mainPage("Invalid file format."));
       }
       const TEMP_DIRECTORY = "/tmp";
-      const STARTING_FILE_PATH = path.join(TEMP_DIRECTORY, "document.xlsx");
-      const ENDING_FILE_PATH = path.join(TEMP_DIRECTORY, "document.pdf");
+      const STARTING_FILE_PATH = `${TEMP_DIRECTORY}/document.xlsx`;
+      const ENDING_FILE_PATH = `${TEMP_DIRECTORY}/document.pdf`;
       const stream = file.stream();
       const destination = createWriteStream(STARTING_FILE_PATH);
       await pipeline(stream, destination);
@@ -99,8 +100,8 @@ async function returnData(
 }
 
 function mainPage(error?: string) {
-  let html = `
-  <!DOCTYPE html>
+  let result = html`
+    <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8">
@@ -117,15 +118,15 @@ function mainPage(error?: string) {
           </div>
           <button type="submit">Upload File</button>
         </form>
-  `;
-  if (error !== undefined) {
-    html += `<strong>Error: ${error}</strong>`;
-  }
-  html += `
-        </body>
+        ${error !== undefined
+          ? html`
+            <strong>Error: ${error}</strong>
+          `
+          : ""}
+      </body>
     </html>
   `;
-  return html;
+  return result;
 }
 
 async function scaleExcelFile(path: string) {
