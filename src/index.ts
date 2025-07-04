@@ -1,16 +1,8 @@
-import {
-  GetObjectCommand,
-  HeadObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { stat, writeFile } from "fs/promises";
-import { createReadStream, createWriteStream } from "fs";
+import { createReadStream, createWriteStream, ReadStream } from "fs";
 import { handle } from "hono/aws-lambda";
-import { createHash } from "crypto";
 import { File } from "buffer";
 import { env } from "process";
 import { inspect, promisify } from "util";
@@ -18,8 +10,8 @@ import { exec } from "child_process";
 import { pipeline } from "stream/promises";
 import Excel from "exceljs";
 import path from "path";
+import { stream } from "hono/streaming";
 
-const URL_EXPIRY_PERIOD_SECS = 6 * 60 * 60;
 const MAX_UPLOAD_FILE_SIZE_BYTES = 18 * 1000 * 1000;
 
 const execAsync = promisify(exec);
@@ -29,15 +21,6 @@ const app = new Hono();
 app.get("/", (c) => {
   return c.html(mainPage());
 });
-
-const s3 = new S3Client();
-
-const bucketName = env.bucketName;
-if (bucketName === undefined) {
-  throw new Error(
-    "Define `bucketName` in `sst.config.ts` as an environment variable.",
-  );
-}
 
 const libreofficePath = env.LIBREOFFICE_PATH;
 if (libreofficePath === undefined) {
@@ -78,21 +61,6 @@ app.post(
           data: "Invalid file format.",
         }));
       }
-      const checksum = await calculateChecksum(file);
-      const command = new GetObjectCommand({
-        Key: checksum,
-        Bucket: bucketName,
-      });
-      const fileExist = await doesFileExist(s3, checksum);
-      if (fileExist) {
-        const url = await getSignedUrl(s3, command, {
-          expiresIn: URL_EXPIRY_PERIOD_SECS,
-        });
-        return c.html(mainPage({
-          type: "url",
-          data: url,
-        }));
-      }
       const TEMP_DIRECTORY = "/tmp";
       const STARTING_FILE_PATH = path.join(TEMP_DIRECTORY, "document.xlsx");
       const ENDING_FILE_PATH = path.join(TEMP_DIRECTORY, "document.pdf");
@@ -108,23 +76,7 @@ app.post(
         `${libreofficePath} --headless --convert-to pdf --outdir ${TEMP_DIRECTORY} ${STARTING_FILE_PATH}`,
       );
       console.log("Processed!");
-      const stats = await stat(ENDING_FILE_PATH);
-      const converted = createReadStream(ENDING_FILE_PATH);
-      const uploadCommand = new PutObjectCommand({
-        Bucket: bucketName,
-        Key: checksum,
-        Body: converted,
-        ContentType: "application/pdf",
-        ContentLength: stats.size,
-      });
-      await s3.send(uploadCommand);
-      const url = await getSignedUrl(s3, command, {
-        expiresIn: URL_EXPIRY_PERIOD_SECS,
-      });
-      return c.html(mainPage({
-        type: "url",
-        data: url,
-      }));
+      return returnData(c, ENDING_FILE_PATH, file.name);
     } catch (error) {
       console.error("Upload error:", inspect(error));
       return c.html(mainPage({
@@ -134,6 +86,25 @@ app.post(
     }
   },
 );
+
+async function returnData(
+  c: Context,
+  filePath: string,
+  canonicalFilename: string,
+) {
+  const stats = await stat(filePath);
+  c.header("Content-Type", "application/octet-stream");
+  c.header("Content-Length", stats.size.toString());
+  c.header(
+    "Content-Disposition",
+    `inline; filename="${path.parse(canonicalFilename).name}.pdf"`,
+  );
+  return stream(c, async (stream) => {
+    await stream.pipe(
+      ReadStream.toWeb(createReadStream(filePath)) as ReadableStream,
+    );
+  });
+}
 
 function mainPage(content?: { type: "error" | "url"; data: string }) {
   let html = `
@@ -173,28 +144,6 @@ function mainPage(content?: { type: "error" | "url"; data: string }) {
   return html;
 }
 
-async function doesFileExist(
-  s3: S3Client,
-  key: string,
-): Promise<boolean> {
-  try {
-    await s3.send(
-      new HeadObjectCommand({
-        Key: key,
-        Bucket: bucketName,
-      }),
-    );
-    return true;
-  } catch (e) {
-    if (e instanceof Error) {
-      if (e.name === "NotFound") {
-        return false;
-      }
-    }
-    throw e;
-  }
-}
-
 async function scaleExcelFile(path: string) {
   const workbook = new Excel.Workbook();
   await workbook.xlsx.read(createReadStream(path));
@@ -203,21 +152,6 @@ async function scaleExcelFile(path: string) {
     worksheet.pageSetup.fitToHeight = 0;
   });
   await workbook.xlsx.write(createWriteStream(path));
-}
-
-async function calculateChecksum(file: File) {
-  const hash = createHash("sha256");
-  const reader = file.stream().getReader();
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      hash.update(value);
-    }
-    return hash.digest("hex");
-  } finally {
-    reader.releaseLock();
-  }
 }
 
 export const handler = handle(app);
