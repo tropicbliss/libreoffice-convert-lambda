@@ -1,1 +1,0 @@
-aws cloudformation describe-stack-events --stack-name libreoffice-convert-lambda --region ap-southeast-1
