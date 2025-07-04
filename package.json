@@ -2,8 +2,7 @@
   "name": "libreoffice-convert-lambda",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "shell": "sst shell --stage production tsx"
+    "build": "tsc"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
