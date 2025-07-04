@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "libreoffice-convert-lambda"
+
+Parameters:
+  Stage:
+    Type: String
+    Default: development
+    AllowedValues: [development, staging, production]
+    Description: Deployment stage
+
+Conditions:
+  IsProduction: !Equals [!Ref Stage, production]
+
+Resources:
+  # IAM Role for Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-converter-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Tags:
+        - Key: Stage
+          Value: !Ref Stage
+
+  # Lambda Function
+  ConverterFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-converter"
+      PackageType: Image
+      Code:
+        ImageUri: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/libreoffice-convert-lambda:latest"
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 45
+      MemorySize: 3008
+      Tags:
+        - Key: Stage
+          Value: !Ref Stage
+
+  # Lambda Function URL
+  FunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !Ref ConverterFunction
+      AuthType: NONE
+      Cors:
+        AllowCredentials: false
+        AllowMethods:
+          - GET
+          - POST
+        AllowOrigins:
+          - "*"
+        MaxAge: 86400
+
+  # Permission for Function URL
+  FunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ConverterFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  FunctionUrl:
+    Description: Lambda Function URL
+    Value: !GetAtt FunctionUrl.FunctionUrl
+    Export:
+      Name: !Sub "${AWS::StackName}-FunctionUrl"
+
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt ConverterFunction.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-FunctionArn"

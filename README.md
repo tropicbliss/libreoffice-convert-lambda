@@ -1,8 +1,7 @@
 # libreoffice-convert-lambda
 
-An example of deploying AWS Lambda container images with SST, which is not
-officially supported at the time of writing. This project wraps around
-LibreOffice to convert Excel files to PDF.
+An example of deploying AWS Lambda container images with CloudFormation. This
+project wraps around LibreOffice to convert Excel files to PDF.
 
 Fonts have not been included in the repo for licensing reasons.
 

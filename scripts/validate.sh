@@ -1,0 +1,1 @@
+aws cloudformation validate-template --template-body file://../cloudformation.yaml --region ap-southeast-1
