@@ -58,14 +58,6 @@ Resources:
     Properties:
       TargetFunctionArn: !Ref ConverterFunction
       AuthType: NONE
-      Cors:
-        AllowCredentials: false
-        AllowMethods:
-          - GET
-          - POST
-        AllowOrigins:
-          - "*"
-        MaxAge: 86400
 
   # Permission for Function URL
   FunctionUrlPermission:
