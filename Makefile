@@ -11,7 +11,7 @@ GREEN := \033[0;32m
 YELLOW := \033[1;33m
 NC := \033[0m # No Color
 
-.PHONY: help validate deploy debug clear-failed clean status all
+.PHONY: help validate deploy debug clear-failed clean status all outputs
 
 # Default target
 all: validate deploy
@@ -58,6 +58,9 @@ deploy: validate ## Build and deploy the Lambda function
 		--region $(REGION)
 	
 	@echo "$(GREEN)✓ Deployment completed successfully$(NC)"
+	$(MAKE) outputs
+
+outputs:
 	@echo "$(GREEN)Stack outputs:$(NC)"
 	aws cloudformation describe-stacks \
 		--stack-name $(NAME) \
@@ -68,7 +71,7 @@ debug: ## Show CloudFormation stack events for debugging
 	@echo "$(GREEN)Fetching stack events...$(NC)"
 	aws cloudformation describe-stack-events \
 		--stack-name $(NAME) \
-		--region $(REGION)
+		--region $(REGION) >> debug.txt
 
 clear-failed: ## Delete failed CloudFormation stack
 	@echo "$(RED)Deleting failed stack...$(NC)"
