@@ -11,10 +11,10 @@ GREEN := \033[0;32m
 YELLOW := \033[1;33m
 NC := \033[0m # No Color
 
-.PHONY: help validate deploy debug clear-failed clean status all outputs
+.PHONY: help validate deploy debug clear-failed clean status all outputs create-ecr
 
 # Default target
-all: validate deploy
+all: validate create-ecr deploy
 
 help: ## Show this help message
 	@echo "LibreOffice Convert Lambda Deployment"
@@ -30,7 +30,17 @@ validate: ## Validate CloudFormation template
 		--region $(REGION)
 	@echo "$(GREEN)✓ Template validation successful$(NC)"
 
-deploy: validate ## Build and deploy the Lambda function
+create-ecr: ## Create ECR repository if it doesn't exist
+	@echo "$(GREEN)Creating ECR repository...$(NC)"
+	@aws ecr create-repository \
+		--repository-name $(NAME) \
+		--region $(REGION) \
+		--image-scanning-configuration scanOnPush=true \
+		--encryption-configuration encryptionType=AES256 \
+		2>/dev/null && echo "$(GREEN)✓ ECR repository created successfully$(NC)" || \
+		echo "$(YELLOW)ECR repository already exists or creation failed$(NC)"
+
+deploy: validate create-ecr ## Build and deploy the Lambda function
 	@echo "$(GREEN)Starting deployment...$(NC)"
 	@echo "$(YELLOW)Building Docker image...$(NC)"
 	docker buildx build --platform linux/amd64 --provenance=false -t $(NAME) .

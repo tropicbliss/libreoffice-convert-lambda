@@ -5,8 +5,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "exceljs": "^4.4.0",
-    "hono": "^4.8.3"
+    "exceljs": "^4.4.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.150",

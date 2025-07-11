@@ -29,7 +29,6 @@ RUN touch /tmp/test.txt \
 FROM base AS builder
 WORKDIR /app
 COPY package*json tsconfig.json src ./
-COPY sst-env.d.ts* ./
 RUN npm ci && \
   npm run build && \
   npm prune --production
