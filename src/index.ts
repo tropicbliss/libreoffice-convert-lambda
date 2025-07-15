@@ -69,7 +69,7 @@ app.post(
       console.log("Processing...");
       await scaleExcelFile(STARTING_FILE_PATH);
       await execAsync(
-        `${libreofficePath} --headless --convert-to pdf --outdir ${TEMP_DIRECTORY} ${STARTING_FILE_PATH}`,
+        `${libreofficePath} --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf --outdir ${TEMP_DIRECTORY} ${STARTING_FILE_PATH}`,
       );
       console.log("Processed!");
       return returnData(c, ENDING_FILE_PATH, file.name);

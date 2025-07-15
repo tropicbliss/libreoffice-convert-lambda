@@ -14,3 +14,5 @@ Fonts have not been included in the repo for licensing reasons.
 - [libreoffice-lambda-base-image](https://github.com/shelfio/libreoffice-lambda-base-image)
   and [@jonathankeebler](https://github.com/jonathankeebler) for the
   [pull request updating LibreOffice](https://github.com/shelfio/libreoffice-lambda-base-image/pull/44).
+- [Sample Excel files](https://github.com/bharathirajatut/sample-excel-dataset)
+  for pre-warming LibreOffice.

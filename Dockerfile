@@ -18,18 +18,9 @@ RUN cd ~/libre/LibreOffice*/RPMS/ && rpm -Uvh *.rpm && rm -fr ~/libre && cd /opt
 ENV HOME=/tmp
 RUN dnf remove tar binutils -y
 
-# Trigger dummy run to generate bootstrap files to improve cold start performance
-RUN touch /tmp/test.txt \
-  && cd /tmp \
-  && ${LIBREOFFICE_PATH} --headless --invisible --nodefault --view \
-  --nolockcheck --nologo --norestore --convert-to pdf \
-  --outdir /tmp /tmp/test.txt \
-  && rm /tmp/test.txt
-
 FROM base AS builder
 WORKDIR /app
 COPY package*json tsconfig.json src ./
-COPY sst-env.d.ts* ./
 RUN npm ci && \
   npm run build && \
   npm prune --production
@@ -41,4 +32,10 @@ COPY --from=builder /app/node_modules ${LAMBDA_TASK_ROOT}/node_modules
 COPY --from=builder /app/dist ${LAMBDA_TASK_ROOT}
 COPY --from=builder /app/package.json ${LAMBDA_TASK_ROOT}/package.json
 ENV LIBREOFFICE_PATH=$LIBREOFFICE_PATH
+COPY test.xlsx /tmp
+
+# Pre-warm LibreOffice with proper document formats
+RUN ${LIBREOFFICE_PATH} --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf --outdir /tmp /tmp/test.xlsx
+
+RUN rm /tmp/test.*
 CMD [ "index.handler" ]
