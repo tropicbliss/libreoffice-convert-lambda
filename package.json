@@ -6,11 +6,11 @@
   },
   "dependencies": {
     "exceljs": "^4.4.0",
-    "hono": "^4.8.4"
+    "hono": "^4.8.5"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.150",
-    "@types/node": "^24.0.13",
+    "@types/node": "^24.0.14",
     "tsx": "^4.20.3",
     "typescript": "^5"
   }
