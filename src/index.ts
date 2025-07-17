@@ -82,11 +82,6 @@ app.post(
       const destination = createWriteStream(STARTING_FILE_PATH);
       await pipeline(stream, destination);
 
-      // Also write the file using buffer method (redundant but ensures file is saved)
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      await writeFile(STARTING_FILE_PATH, buffer);
-
       console.log("Processing...");
 
       // Scale the Excel file to fit on PDF pages properly
