@@ -63,9 +63,6 @@ app.post(
       const stream = file.stream();
       const destination = createWriteStream(STARTING_FILE_PATH);
       await pipeline(stream, destination);
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      await writeFile(STARTING_FILE_PATH, buffer);
       console.log("Processing...");
       await scaleExcelFile(STARTING_FILE_PATH);
       await execAsync(
