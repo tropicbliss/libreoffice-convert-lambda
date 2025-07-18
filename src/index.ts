@@ -92,6 +92,9 @@ app.post(
         `${libreofficePath} --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf --outdir ${TEMP_DIRECTORY} ${STARTING_FILE_PATH}`,
       );
 
+      console.log("stdout:", result.stdout);
+      console.log("stderr:", result.stderr);
+
       console.log("Processed!");
 
       // Return the converted PDF file to the user
