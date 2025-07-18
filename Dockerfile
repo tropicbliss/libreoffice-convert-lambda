@@ -4,13 +4,7 @@ FROM public.ecr.aws/lambda/nodejs:22-x86_64 AS base
 ARG DOWNLOAD_URL=https://downloadarchive.documentfoundation.org/libreoffice/old/24.8.7.2/rpm/x86_64/LibreOffice_24.8.7.2_Linux_x86-64_rpm.tar.gz
 ARG LIBREOFFICE_PATH=libreoffice24.8
 
-ENV PATH=/var/lang/bin:/usr/local/bin:/usr/bin/:/bin:/opt/bin
-
-# Configure linker to correctly point to libraries
-ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib64"
-
 RUN dnf install -y libSM.x86_64 libXinerama-devel tar gzip nss-tools cups-libs libxslt fontconfig binutils which && dnf clean all
-RUN cp /lib64/libssl.so.3 /lib64/libssl3.so
 
 RUN mkdir ~/libre && cd ~/libre && curl -s -L ${DOWNLOAD_URL} | tar xvz
 
