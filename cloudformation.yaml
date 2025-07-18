@@ -51,6 +51,9 @@ Resources:
       Tags:
         - Key: Stage
           Value: !Ref Stage
+      Environment:
+        Variables:
+          HOME: /tmp
 
   # Lambda Function URL
   FunctionUrl:

@@ -88,7 +88,7 @@ app.post(
       await scaleExcelFile(STARTING_FILE_PATH);
 
       // Use LibreOffice to convert the Excel file to PDF
-      await execAsync(
+      const result = await execAsync(
         `${libreofficePath} --headless --invisible --nodefault --view --nolockcheck --nologo --norestore --convert-to pdf --outdir ${TEMP_DIRECTORY} ${STARTING_FILE_PATH}`,
       );
 
